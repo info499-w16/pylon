@@ -4,7 +4,8 @@
   "description": "A microservice gateway",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "develop": "node ./node_modules/gulp/bin/gulp",
+    "transpile": "node ./node_modules/gulp/bin/gulp babel"
   },
   "repository": {
     "type": "git",
@@ -19,11 +20,17 @@
   "author": {
     "name": "Caleb Thorsteinson",
     "email": "caleb@thorsteinson.me",
-    "url" : "http://thorsteinson.me"
-  }
+    "url": "http://thorsteinson.me"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/info499-w16/pylon/issues"
   },
-  "homepage": "https://github.com/info499-w16/pylon#readme"
+  "homepage": "https://github.com/info499-w16/pylon#readme",
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-babel": "^6.1.1",
+    "gulp-sourcemaps": "^1.6.0",
+    "gulp-standard": "^5.2.2"
+  }
 }
