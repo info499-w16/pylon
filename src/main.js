@@ -14,6 +14,16 @@ const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy
 const auth = require('./controllers/authentication')
 const users = require('./models/users')
 
+const PORT = process.env.PORT || 3000
+
+function loadEnv (envVar) {
+  if (!process.env[envVar]) throw new Error(`Environment variable '${envVar}' not found`)
+  return process.env[envVar]
+}
+
+const GOOGLE_CLIENT_ID = loadEnv('CLIENT')
+const GOOGLE_CLIENT_SECRET = loadEnv('SECRET')
+
 // Immediately begin connecting to redis
 users.initializeRedis({
   // REDIS_NAME is automatically set by docker
@@ -43,11 +53,19 @@ app.use(session({
 passport.serializeUser(auth.serializeUser)
 passport.deserializeUser(auth.deserializeUser)
 
-passport.use(GoogleStrategy)
+// Sets up passport to use Google for authentication
+passport.use(new GoogleStrategy({
+  clientID: GOOGLE_CLIENT_ID,
+  clientSecret: GOOGLE_CLIENT_SECRET,
+  callbackURL: `http://localhost:${PORT}/auth/google/callback`
+}, (token, tokenSecret, profile, done) => {
+  // This should properly look them up and authenticate them
+  users.deserializeUser(profile.id)
+}))
 
 app.use(passport.initialize())
 app.use(passport.session())
-const server = app.listen(process.env.PORT || 3000, () => {
+const server = app.listen(PORT, () => {
   const addr = server.address()
   if (addr.address === '::') {
     addr.address = 'localhost'

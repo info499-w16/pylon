@@ -29,7 +29,7 @@ function deserializeOauthProfile (record) {
 }
 
 module.exports.getById = function (id) {
-  redisClient.hgetallAsync(id).then(deserializeOauthProfile)
+  redisClient.hgetallAsync(`user:${id}`).then(deserializeOauthProfile)
 }
 
 module.exports.getByProviderId = function (authProvider, authId) {
