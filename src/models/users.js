@@ -7,8 +7,8 @@ bluebird.promisifyAll(redis.Multi.prototype)
 
 var redisClient
 
-function userKey ({authId}) {
-  return `user:${authId}`
+function userKey ({id}) {
+  return `user:${id}`
 }
 
 // This should be called before doing any redis related things
@@ -16,44 +16,28 @@ module.exports.initializeRedis = function (redisOptions) {
   redisClient = redis.createClient(redisOptions)
 }
 
-function deserializeOauthProfile (record) {
-  if (!record) {
-    return null
-  }
-
-  if (record.oauthProfileJson) {
-    record.oauthProfile = JSON.parse(record.oauthProfileJson)
-  }
-  delete record.oauthProfileJson
-  return record
+// Performs a lookup, and if the user doesn't exist, adds them
+module.exports.createOrLookup = function (profile) {
+  const {id} = profile
+  return module.exports.doesUserExist(id)
+    .then(exists => {
+      if (exists) return module.exports.getById(id)
+      else {
+        return module.exports.insert(id, {
+          name: profile.displayName,
+          gender: profile.gender,
+          email: profile.emails[0].value
+        })
+      }
+    })
 }
 
 module.exports.getById = function (id) {
-  redisClient.hgetallAsync(`user:${id}`).then(deserializeOauthProfile)
+  redisClient.hgetallAsync(`user:${id}`)
 }
 
-module.exports.getByProviderId = function (authProvider, authId) {
-  // var sql = 'select * from users where authProvider=? and authId=?'
-  // var params = [authProvider, authId]
-  // return db.selectOne(sql, params).then(deserializeOauthProfile)
-}
-
-module.exports.insert = function (user) {
-  // var sql = 'insert into users (authProvider,authId,email,passhash,displayName,oauthProfileJson) values (?,?,?,?,?,?)'
-  // var params = [
-  //   user.authProvider
-  //   user.authId
-  //   user.email
-  //   user.passhash
-  //   user.displayName
-  //   user.oauthProfile ? JSON.stringify(user.oauthProfile) : null
-  // ];
-  // return db.execute(sql, params)
-  //   .then(function(results) {
-  //     user.id = results.insertId;
-  //     return user;
-  //   });
-  return redisClient.hmsetAsync(userKey(user), user)
+module.exports.insert = function (id, user) {
+  return redisClient.hmsetAsync(`user:${id}`, user)
 }
 
 module.exports.update = function (user) {
@@ -61,13 +45,7 @@ module.exports.update = function (user) {
   return user
 }
 
-module.exports.doesUserExist = function (authProvider, authId) {
-  // var sql = 'select count(*) as numUsers from users where authProvider=? and authId=?';
-  // var params = [authProvider, authId];
-  // return db.selectOne(sql, params)
-  //     .then(function(row) {
-  //         return row.numUsers != 0;
-  //     });
+module.exports.doesUserExist = function (authId) {
   return redisClient.existsAsync(`user:${authId}`)
 }
 
