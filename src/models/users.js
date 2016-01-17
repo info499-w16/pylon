@@ -29,11 +29,7 @@ function deserializeOauthProfile (record) {
 }
 
 module.exports.getById = function (id) {
-<<<<<<< HEAD
   redisClient.hgetallAsync(id).then(deserializeOauthProfile)
-=======
-  redisClient.hgetall(id).then(deserializeOauthProfile)
->>>>>>> f338847cdbd19f5670b4dc9ef28c332ca138269f
 }
 
 module.exports.getByProviderId = function (authProvider, authId) {
@@ -57,11 +53,7 @@ module.exports.insert = function (user) {
   //     user.id = results.insertId;
   //     return user;
   //   });
-<<<<<<< HEAD
   return redisClient.hmsetAsync(userKey(user), user)
-=======
-  return redisClient.hmset(userKey(user), user)
->>>>>>> f338847cdbd19f5670b4dc9ef28c332ca138269f
 }
 
 module.exports.update = function (user) {
@@ -76,15 +68,7 @@ module.exports.doesUserExist = function (authProvider, authId) {
   //     .then(function(row) {
   //         return row.numUsers != 0;
   //     });
-<<<<<<< HEAD
   return redisClient.existsAsync(`user:${authId}`)
-=======
-  redisClient.exists(`user:${authId}`, (err, reply) {
-    if (err) throw err
-
-    return reply
-  })
->>>>>>> f338847cdbd19f5670b4dc9ef28c332ca138269f
 }
 
 module.exports.getAll = function () {
