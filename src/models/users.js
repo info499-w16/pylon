@@ -1,6 +1,15 @@
 const redis = require('redis')
+const bluebird = require('bluebird')
+
+// Adds async to all redis methods, allowing for usage as a promise
+bluebird.promisifyAll(redis.RedisClient.prototype)
+bluebird.promisifyAll(redis.Multi.prototype)
 
 var redisClient
+
+function userKey ({authId}) {
+  return `user:${authId}`
+}
 
 // This should be called before doing any redis related things
 module.exports.initializeRedis = function (redisOptions) {
@@ -20,12 +29,7 @@ function deserializeOauthProfile (record) {
 }
 
 module.exports.getById = function (id) {
-  // return db.selectOne('select * from users where id=?', id).then(deserializeOauthProfile);
-  redisClient.get(id, (err, reply) => {
-    if (err) throw err
-
-    return deserializeOauthProfile(reply)
-  })
+  redisClient.hgetallAsync(id).then(deserializeOauthProfile)
 }
 
 module.exports.getByProviderId = function (authProvider, authId) {
@@ -49,20 +53,12 @@ module.exports.insert = function (user) {
   //     user.id = results.insertId;
   //     return user;
   //   });
+  return redisClient.hmsetAsync(userKey(user), user)
 }
 
 module.exports.update = function (user) {
-  // var sql = 'update users set email=?, displayName=?, oauthProfileJson=? where id=?';
-  // var params = [
-  //     user.email,
-  //     user.displayName,
-  //     user.oauthProfile ? JSON.stringify(user.oauthProfile) : null,
-  //     user.id
-  // ];
-  // return db.execute(sql, params)
-  //     .then(function() {
-  //         return user;
-  //     });
+  redisClient.hmset(userKey(user), user)
+  return user
 }
 
 module.exports.doesUserExist = function (authProvider, authId) {
@@ -72,6 +68,7 @@ module.exports.doesUserExist = function (authProvider, authId) {
   //     .then(function(row) {
   //         return row.numUsers != 0;
   //     });
+  return redisClient.existsAsync(`user:${authId}`)
 }
 
 module.exports.getAll = function () {
