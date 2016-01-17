@@ -15,7 +15,11 @@ const auth = require('./controllers/authentication')
 const users = require('./models/users')
 
 // Immediately begin connecting to redis
-users.initializeRedis()
+users.initializeRedis({
+  // REDIS_NAME is automatically set by docker
+  // If not found, assume it's running on the localhost
+  host: process.env.REDIS_NAME ? 'redis' : 'localhost'
+})
 
 // create the express application
 var app = express()
