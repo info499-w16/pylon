@@ -1,6 +1,13 @@
 const redis = require('redis')
+const bluebrid = require('bluebird')
+bluebird.promisifyAll(redis.RedisClient.prototype)
+bluebird.promisifyAll(redis.Multi.prototype)
 
 var redisClient
+
+function userKey ({authId}) {
+  return `user:${authId}`
+}
 
 // This should be called before doing any redis related things
 module.exports.initializeRedis = function (redisOptions) {
@@ -20,12 +27,7 @@ function deserializeOauthProfile (record) {
 }
 
 module.exports.getById = function (id) {
-  // return db.selectOne('select * from users where id=?', id).then(deserializeOauthProfile);
-  redisClient.get(id, (err, reply) => {
-    if (err) throw err
-
-    return deserializeOauthProfile(reply)
-  })
+  redisClient.hgetall(id).then(deserializeOauthProfile)
 }
 
 module.exports.getByProviderId = function (authProvider, authId) {
@@ -49,20 +51,12 @@ module.exports.insert = function (user) {
   //     user.id = results.insertId;
   //     return user;
   //   });
+  return redisClient.hmset(userKey(user), user)
 }
 
 module.exports.update = function (user) {
-  // var sql = 'update users set email=?, displayName=?, oauthProfileJson=? where id=?';
-  // var params = [
-  //     user.email,
-  //     user.displayName,
-  //     user.oauthProfile ? JSON.stringify(user.oauthProfile) : null,
-  //     user.id
-  // ];
-  // return db.execute(sql, params)
-  //     .then(function() {
-  //         return user;
-  //     });
+  redisClient.hmset(userKey(user), user)
+  return user
 }
 
 module.exports.doesUserExist = function (authProvider, authId) {
@@ -72,6 +66,11 @@ module.exports.doesUserExist = function (authProvider, authId) {
   //     .then(function(row) {
   //         return row.numUsers != 0;
   //     });
+  redisClient.exists(`user:${authId}`, (err, reply) {
+    if (err) throw err
+
+    return reply
+  })
 }
 
 module.exports.getAll = function () {
