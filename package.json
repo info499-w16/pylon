@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "develop": "node ./node_modules/gulp/bin/gulp",
+    "start": "node ./dist/main",
     "transpile": "node ./node_modules/gulp/bin/gulp babel"
   },
   "repository": {
