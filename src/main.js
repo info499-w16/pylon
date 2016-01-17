@@ -58,6 +58,9 @@ passport.use(new GoogleStrategy({
   clientID: GOOGLE_CLIENT_ID,
   clientSecret: GOOGLE_CLIENT_SECRET,
   callbackURL: `http://localhost:${PORT}/auth/google/callback`
+}, (token, tokenSecret, profile, done) => {
+  // This should properly look them up and authenticate them
+  users.deserializeUser(profile.id).then(done)
 }))
 
 app.use(passport.initialize())
