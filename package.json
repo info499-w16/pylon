@@ -1,0 +1,29 @@
+{
+  "name": "pylon",
+  "version": "0.0.0",
+  "description": "A microservice gateway",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/info499-w16/pylon.git"
+  },
+  "keywords": [
+    "microservice",
+    "express",
+    "proxy",
+    "gateway"
+  ],
+  "author": {
+    "name": "Caleb Thorsteinson",
+    "email": "caleb@thorsteinson.me",
+    "url" : "http://thorsteinson.me"
+  }
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/info499-w16/pylon/issues"
+  },
+  "homepage": "https://github.com/info499-w16/pylon#readme"
+}
