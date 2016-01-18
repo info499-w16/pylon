@@ -1,7 +1,7 @@
 const users = require('../models/users')
 
 module.exports.serializeUser = function (user, done) {
-  return done(null, user.id)
+  return done(null, user.authId)
 }
 
 module.exports.deserializeUser = function (id, done) {
