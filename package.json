@@ -4,6 +4,7 @@
   "description": "A microservice gateway",
   "main": "index.js",
   "scripts": {
+    "debug": "node --debug ./dist/main",
     "develop": "node ./node_modules/gulp/bin/gulp",
     "start": "node ./dist/main",
     "build": "node ./node_modules/gulp/bin/gulp babel"

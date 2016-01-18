@@ -14,6 +14,7 @@ function userKey ({id}) {
 // This should be called before doing any redis related things
 module.exports.initializeRedis = function (redisOptions) {
   redisClient = redis.createClient(redisOptions)
+  return redisClient
 }
 
 // Performs a lookup, and if the user doesn't exist, adds them
@@ -33,7 +34,7 @@ module.exports.createOrLookup = function (profile) {
 }
 
 module.exports.getById = function (id) {
-  redisClient.hgetallAsync(`user:${id}`)
+  return redisClient.hgetallAsync(`user:${id}`)
 }
 
 module.exports.insert = function (id, user) {
