@@ -1,6 +1,4 @@
 const gulp = require('gulp')
-const sourcemaps = require('gulp-sourcemaps')
-const babel = require('gulp-babel')
 const standard = require('gulp-standard')
 
 const SOURCES = 'src/**/*.js'
@@ -16,19 +14,8 @@ gulp.task('standard', () => {
 })
 
 // Sets up nice development environment
-gulp.task('develop', () => {
-  gulp.watch(SOURCES, ['standard', 'babel'])
+gulp.task('watch', () => {
+  gulp.watch(SOURCES, ['standard'])
 })
 
-// Performs transpilation
-gulp.task('babel', ['standard'], () => {
-  return gulp.src(SOURCES)
-    .pipe(sourcemaps.init())
-    .pipe(babel({
-      presets: ['es2015']
-    }))
-    .pipe(sourcemaps.write('.'))
-    .pipe(gulp.dest(DIST))
-})
-
-gulp.task('default', ['develop', 'standard', 'babel'])
+gulp.task('default', ['watch', 'standard'])

@@ -65,7 +65,7 @@ module.exports.Strategy = () => {
 module.exports.GoogleRouter = () => {
   var router = express.Router()
 
-  router.get('/signin/google', passport.authenticate(PROVIDER, {scope: 'profile'}))
+  router.get('/signin/google', passport.authenticate(PROVIDER, {scope: ['email', 'profile']}))
 
   router.get('/auth/google/callback', passport.authenticate(PROVIDER, {scope: 'profile'}),
     authentication.backToRequestedUrl)
