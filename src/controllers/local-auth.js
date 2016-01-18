@@ -76,6 +76,10 @@ module.exports.GoogleRouter = () => {
 module.exports.Router = () => {
   var router = express.Router()
 
+  router.get('/session', ({user, session}, res) => {
+    res.json({user, session})
+  })
+
   router.post('/signin', passport.authenticate(PROVIDER), (req, res) => {
     var response = {message: 'authenticated'}
 
