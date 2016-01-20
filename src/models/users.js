@@ -17,28 +17,14 @@ module.exports.initializeRedis = function (redisOptions) {
   return redisClient
 }
 
-// Performs a lookup, and if the user doesn't exist, adds them
-module.exports.createOrLookup = function (profile) {
-  const {id} = profile
-  return module.exports.doesUserExist(id)
-    .then(exists => {
-      if (exists) return module.exports.getById(id)
-      else {
-        return module.exports.insert(id, {
-          name: profile.displayName,
-          gender: profile.gender,
-          email: profile.emails[0].value
-        })
-      }
-    })
-}
-
 module.exports.getById = function (id) {
-  return redisClient.hgetallAsync(`user:${id}`)
+  return redisClient.getAsync(`user:${id}`)
+    .then(serialUser => JSON.parse(serialUser))
 }
 
 module.exports.insert = function (id, user) {
-  return redisClient.hmsetAsync(`user:${id}`, user)
+  return redisClient.setAsync(`user:${id}`, JSON.stringify(user))
+    .then(() => user)
 }
 
 module.exports.update = function (user) {
@@ -46,8 +32,8 @@ module.exports.update = function (user) {
   return user
 }
 
-module.exports.doesUserExist = function (authId) {
-  return redisClient.existsAsync(`user:${authId}`)
+module.exports.doesUserExist = function (id) {
+  return redisClient.existsAsync(`user:${id}`)
 }
 
 module.exports.getAll = function () {

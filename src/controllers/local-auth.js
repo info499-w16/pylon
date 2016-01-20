@@ -7,6 +7,8 @@ const PROVIDER = 'google'
 const authentication = require('./authentication')
 const GoogleStrategy = require('passport-google-oauth').OAuth2Strategy
 
+// Helper function for loading secret keys mainly. If they aren't found, just
+// crash
 function loadEnv (envVar) {
   if (!process.env[envVar]) throw new Error(`Environment variable '${envVar}' not found`)
   return process.env[envVar]
@@ -55,7 +57,8 @@ module.exports.Strategy = () => {
         }
       })
       .then(user => {
-        console.log('got a user, calling done funciton')
+        console.log('got a user, calling done function')
+        console.log(user)
         done(null, user)
       })
       .catch(done)
