@@ -22,8 +22,8 @@ function convertToUser (profile) {
     authProvider: PROVIDER,
     authId: profile.id,
     displayName: profile.displayName,
-    email: profile.emails && profile.emails.length > 0 ? profile.emails[0].value : null
-    // oauthProfile: profile
+    email: profile.emails && profile.emails.length > 0 ? profile.emails[0].value : null,
+    oauthProfile: profile
   }
 }
 
