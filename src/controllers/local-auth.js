@@ -83,48 +83,6 @@ module.exports.Router = () => {
     res.json({user, session})
   })
 
-  router.post('/signin', passport.authenticate(PROVIDER), (req, res) => {
-    var response = {message: 'authenticated'}
-
-    if (req.session.afterAuthRedirectTo) {
-      response.redirectTo = req.session.afterAuthRedirectTo
-      delete req.session.afterAuthRedirectTo
-    }
-
-    res.json(response)
-  })
-
-  // router.post('/signup', (req, res, next) => {
-  //   var newUser = req.body
-
-  //   // ensure new user has required properties
-  //   if (!newUser || !newUser.email || !newUser.displayName || !newUser.password) {
-  //     return next({status: 400, message: 'Email, display name, and password are all required.'})
-  //   }
-
-  //   newUser.authProvider = PROVIDER
-  //   newUser.authId = newUser.email
-
-  //   users.doesUserExist(PROVIDER, newUser.email)
-  //     .then(alreadyRegistered => {
-  //       if (alreadyRegistered) {
-  //         throw new Error({status: 400, message: 'That email address is already registered.'})
-  //       }
-
-  //       return hashPassword(newUser)
-  //     })
-  //     .then(() => {
-  //       return users.insert(newUser)
-  //     })
-  //     .then(() => {
-  //       return loginUser(newUser, req)
-  //     })
-  //     .then(() => {
-  //       res.status(201).json({message: 'created and authenticated new user'})
-  //     })
-  //     .catch(next)
-  // })
-
   router.get('/signout', (req, res) => {
     req.logout()
     res.json({message: 'signed out'})

@@ -50,8 +50,10 @@ passport.use(localAuth.Strategy())
 
 app.use(passport.initialize())
 app.use(passport.session())
-
 app.use(localAuth.GoogleRouter())
+
+// In order to use our local router, they must be authenticated
+app.use(API_ROOT, auth.ensureAuth('/signin/google'))
 app.use(API_ROOT, localAuth.Router())
 
 // ensure the user is authenticated before any

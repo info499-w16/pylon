@@ -15,7 +15,7 @@ module.exports.ensureAuth = function (signinUrl) {
     if (req.isAuthenticated()) {
       return next()
     } else {
-      req.session.afterAuthRedirectTo = req.url
+      req.session.afterAuthRedirectTo = req.baseUrl + req.url
       res.redirect(signinUrl)
     }
   }
