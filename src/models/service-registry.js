@@ -22,8 +22,10 @@ module.exports.add = function (name, serviceInstance) {
   serviceInstance.id = id
 
   const serialized = JSON.stringify(serviceInstance)
-  client.sadd(`service:${name}`, serialized)
-  return id
+  return client.saddAsync(`service:${name}`, serialized)
+    .then(() => {
+      return id
+    })
 }
 
 // Gets an instance of a service
@@ -56,7 +58,7 @@ module.exports.remove = function (name, id) {
       const memberToRemove = _.filter(members, {'id': id})[0]
       const serialized = JSON.stringify(memberToRemove)
 
-      return client.srem(`service:${name}`, serialized)
+      return client.sremAsync(`service:${name}`, serialized)
     })
 }
 
@@ -78,10 +80,10 @@ module.exports.authorize = function (name, userId) {
 
 // Does the user have the authority to use said service?
 module.exports.isAuthorized = function (name, userId) {
-  return client.sismember(`service:${name}:authorized`, userId)
+  return client.sismemberAsync(`service:${name}:authorized`, userId)
 }
 
-// Deauthorizes a use to use a given service
+// Deauthorizes a user to use a given service
 module.exports.ban = function (name, userId) {
-  return client.spop(`service:${name}:authorized`, userId)
+  return client.spopAsync(`service:${name}:authorized`, userId)
 }
