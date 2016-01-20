@@ -12,6 +12,9 @@ function userKey ({id}) {
 }
 
 // This should be called before doing any redis related things
+//
+// Since this is redis specific and not USER specific, maybe it should be
+// moved elsewhere?
 module.exports.initializeRedis = function (redisOptions) {
   redisClient = redis.createClient(redisOptions)
   return redisClient
