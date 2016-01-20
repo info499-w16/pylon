@@ -75,7 +75,7 @@ module.exports.update = function (name, id, updated) {
 // Authorizes a user to use a given service
 module.exports.authorize = function (name, userId) {
   // Eventually use a more expressive model, like groups
-  return client.saddAsyc(`service:${name}:authorized`, userId)
+  return client.saddAsync(`service:${name}:authorized`, userId)
 }
 
 // Does the user have the authority to use said service?
