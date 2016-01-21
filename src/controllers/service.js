@@ -26,7 +26,12 @@ module.exports.Router = () => {
   router.delete('/registry/:name/:id/authentication/:userId')
 
   // This is where we will perform forwarding and do service lookups
-  router.all('/forward/:name')
+  router.all('/forward/:name', (req, res) => {
+    console.log(req)
+    res.json({
+      name: req.params.name
+    })
+  })
 
   return router
 }

@@ -13,6 +13,8 @@ const passport = require('passport')
 const auth = require('./controllers/authentication')
 const users = require('./models/users')
 const localAuth = require('./controllers/local-auth')
+const registryModel = require('./models/service-registry')
+const registryController = require('./controllers/service')
 
 const PORT = process.env.PORT || 3000
 const API_ROOT = '/api/v1'
@@ -23,6 +25,9 @@ const rc = users.initializeRedis({
   // If not found, assume it's running on the localhost
   host: process.env.REDIS_NAME ? 'redis' : 'localhost'
 })
+
+// Allows the registry to store information
+registryModel.setClient(rc)
 
 // create the express application
 var app = express()
@@ -52,13 +57,9 @@ app.use(passport.initialize())
 app.use(passport.session())
 app.use(localAuth.GoogleRouter())
 
-// In order to use our local router, they must be authenticated
+// In order to use the main API they must be authenticated
 app.use(API_ROOT, auth.ensureAuth('/signin/google'))
-app.use(API_ROOT, localAuth.Router())
-
-// ensure the user is authenticated before any
-// of the following middleware is run for the request
-// app.use(auth.ensureAuth('/'))
+app.use(API_ROOT, registryController.Router())
 
 const server = app.listen(PORT, () => {
   const addr = server.address()
