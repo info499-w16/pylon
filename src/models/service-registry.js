@@ -50,11 +50,8 @@ module.exports.getAll = function (name) {
       if (keys.length === 0) {
         throw new Error(`Service ${name} not registered`)
       }
-      // Parellize promises  Note: may be better to alter API so that multiple
-      // promises aren't needed, especially for getByID
-      return Promise.all(_.map(keys, key => {
-        return client.getAsync(key)
-      }))
+
+      return client.mgetAsync(keys)
     }).then(members => {
       // Reserialize
       return _.map(members, JSON.parse)
