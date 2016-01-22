@@ -71,16 +71,6 @@ module.exports.remove = function (name, id) {
   return client.delAsync(`service:${name}:${id}`)
 }
 
-// Updates an instance of a service
-// module.exports.update = function (name, id, updated) {
-//   return module.exports.remove(name, id)
-//     .then(() => {
-//       updated.id = id
-//       const serialized = JSON.stringify(updated)
-//       return module.exports.add(`service:${name}`, serialized)
-//     })
-// }
-
 // Authorizes a user to use a given service
 module.exports.authorize = function (name, userId) {
   // Eventually use a more expressive model, like groups
