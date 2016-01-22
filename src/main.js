@@ -4,7 +4,6 @@
 const crypto = require('crypto')
 const express = require('express')
 const morgan = require('morgan')
-const bodyParser = require('body-parser')
 const session = require('express-session')
 const RedisStore = require('connect-redis')(session)
 const passport = require('passport')
@@ -38,8 +37,8 @@ var app = express()
 // request logging
 app.use(morgan(process.env.LOG_FORMAT || 'dev'))
 // parse both json and url-encoded body content
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({extended: false}))
+// app.use(bodyParser.json())
+// app.use(bodyParser.urlencoded({extended: false}))
 // support user sessions
 app.use(session({
   secret: crypto.randomBytes(64).toString('hex'),
