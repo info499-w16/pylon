@@ -1,3 +1,4 @@
+const semver = require('semver')
 const request = require('request')
 const express = require('express')
 const serviceRegistry = require('../models/service-registry')
@@ -39,13 +40,16 @@ module.exports.Router = () => {
   router.delete('/registry/:name/:id/authentication/:userId')
 
   // This is where we will perform forwarding and do service lookups
-  router.all('/forward/:name/*', (req, res) => {
+  router.all('/forward/:name/:version/*', (req, res) => {
+    if (!semver.valid(req.params.version)) {
+      res.status(400).send(`Supplied invalid version string: ${req.params.version}`)
+    }
     // IP Lookup for service
-    serviceRegistry.get(req.params.name)
+    serviceRegistry.get(req.params.name, req.params.version)
       .then(({ipAddr, port}) => {
         // Port is optional
         port = port || 80
-        const idx = `/forward/${req.params.name}`.length
+        const idx = `/forward/${req.params.name}/${req.params.version}`.length
         const forwardedPath = req.url.substring(idx)
         const uri = `http://${ipAddr}:${port}${forwardedPath}`
         // Proxy the reqest

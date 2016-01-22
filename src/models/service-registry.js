@@ -1,6 +1,7 @@
 const redis = require('redis')
 const bluebird = require('bluebird')
 const _ = require('lodash')
+const semver = require('semver')
 
 // Sets how often a service needs to update itself
 const TTL = process.env.TTL || 40
@@ -29,19 +30,20 @@ module.exports.add = function (serviceInstance) {
     })
 }
 
-// Gets an instance of a service
-module.exports.get = function (name) {
+// Gets an instance of a service that satisfies provided version constraint
+module.exports.get = function (name, version) {
   // Note that if we have multiple versions of a service, this will just give
-  // back random ones, with no real prefernce. Should find a way to do real load
+  // back random ones, with no real preference. Should find a way to do real load
   // balancing
-  return module.exports.getAll(name)
+  return module.exports.getAll(name, version)
     .then(instances => {
       return _(instances).shuffle().value()[0]
     })
 }
 
-// Gets all of the instances of a service
-module.exports.getAll = function (name) {
+// Gets all of the instances of a service, optionally filtering by the
+// supplied version using the same technique NPM uses for handling packges
+module.exports.getAll = function (name, versionQ) {
   // Note that this uses the KEYS command, which is inneficient. We should
   // find a more efficient way to do grouping in the future
   console.log(`service:${name}:*`)
@@ -54,7 +56,12 @@ module.exports.getAll = function (name) {
       return client.mgetAsync(keys)
     }).then(members => {
       // Reserialize
-      return _.map(members, JSON.parse)
+      return _(members)
+        .map(JSON.parse)
+        .filter(({version}) => {
+          return semver.satisfies(version, `^${versionQ}`)
+        })
+        .value()
     })
 }
 
