@@ -1,6 +1,5 @@
 const redis = require('redis')
 const bluebird = require('bluebird')
-const uuid = require('uuid')
 const _ = require('lodash')
 
 // Adds async to all redis methods, allowing for usage as a promise
@@ -14,12 +13,9 @@ module.exports.setClient = function (redisClient) {
 }
 
 // Adds a new service instance
-module.exports.add = function (name, serviceInstance) {
-  const {ipAddr} = serviceInstance
-  if (!ipAddr || !name) throw new Error('Required parameters missing: Need ipAddr')
-
-  const id = uuid.v4()
-  serviceInstance.id = id
+module.exports.add = function (serviceInstance) {
+  const {ipAddr, id, name} = serviceInstance
+  if (!id || !ipAddr || !name) throw new Error('Required parameters missing: Need ipAddr name and id')
 
   const serialized = JSON.stringify(serviceInstance)
   return client.saddAsync(`service:${name}`, serialized)
