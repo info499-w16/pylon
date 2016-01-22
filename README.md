@@ -1,42 +1,27 @@
 # pylon
 A microservice gateway
 
-## UDP Server Example
+## Building
+Dockerfile should be coming soon, but a 
+## Running
 
-```js
+Recommended to run as a docker container. Requires that redis be running on the localhost at the default port. Once all of these conditions are met, do an `npm start`, and the application should be running on port 3000 (unless overridden with the environment variable `PORT`).
 
-const dgram = require('dgram');
-const server = dgram.createSocket('udp4');
+Also requires two environment variables to be set
+`CLIENT` and `SECRET`, which correspond the values used by your registered google application. Without these the application will not start
 
-server.on('error', (err) => {
-  console.log(`server error:\n${err.stack}`);
-  server.close();
-});
+Currently this doesn't do anything without also running another service that identifies itself via UDP broadcast. [__Echo__](https://github.com/info499-w16/echo) is an example of a service which provides self identifying information and registers itself with Pylon.
 
-server.on('message', (msg, rinfo) => {
-  console.log(`server got: ${msg} from ${rinfo.address}:${rinfo.port}`);
-    const resJSON = JSON.parse(msg)
-    console.log(resJSON)
-});
+Once you have redis running, and a service like echo, you can begin to actually test out the forwarding capabilities.
 
-server.on('listening', () => {
-  var address = server.address();
-  server.setBroadcast(true);
-  console.log(`server listening ${address.address}:${address.port}`);
-});
+Simply send a request to `http://domain.com/api/v1/forward/{name}/root/path`. You should first try visiting this link in a web browser to login via google. After authenticating you will be redirected, and will get the expected response of the service.
 
-server.bind(8989);
+## Example With Echo
+
+Currently echo doesn't do what the name implies, but writes out the body as the following JSON response
+
+```
+{"hello":"world"}
 ```
 
-## UDP Client Example
-
-```js
-const dgram = require('dgram');
-const message = JSON.stringify({"hello": "world"});
-const client = dgram.createSocket('udp4');
-client.bind(8989, () => {
-  clinet.setBroadcast(true);
-  client.send(message, 0, message.length, 8989, '255.255.255.255', (err) => {
-    client.close();
-  });
-});
+Accessing `http://domain.com/api/v1/forward/echo/hello` is equivilant to calling `http://echos-domain.com/hello`.
