@@ -1,3 +1,4 @@
+const request = require('request')
 const express = require('express')
 const serviceRegistry = require('../models/service-registry')
 // const users = require('../models/users')
@@ -38,11 +39,27 @@ module.exports.Router = () => {
   router.delete('/registry/:name/:id/authentication/:userId')
 
   // This is where we will perform forwarding and do service lookups
-  router.all('/forward/:name', (req, res) => {
-    console.log(req)
-    res.json({
-      name: req.params.name
-    })
+  router.all('/forward/:name/*', (req, res) => {
+    // IP Lookup for service
+    serviceRegistry.get(req.params.name)
+      .then(({ipAddr, port}) => {
+        // Port is optional
+        port = port || 80
+        const idx = `/forward/${req.params.name}`.length
+        const forwardedPath = req.url.substring(idx)
+        const options = {
+          headers: req.headers,
+          uri: `http://${ipAddr}:${port}${forwardedPath}`,
+          method: req.method
+        }
+
+        // Forward the request
+        request(options, (extReq, extRes) => {
+          res.send(extRes)
+        })
+      }).catch(() => {
+        res.status(404).send(`Service '${req.params.name}' not found :(`)
+      })
   })
 
   return router

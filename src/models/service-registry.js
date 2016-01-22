@@ -34,17 +34,28 @@ module.exports.get = function (name) {
   // Note that if we have multiple versions of a service, this will just give
   // back random ones, with no real prefernce. Should find a way to do real load
   // balancing
-  return module.exports.getAll(instances => {
-    return _(instances).shuffle().value()[0]
-  })
+  return module.exports.getAll(name)
+    .then(instances => {
+      return _(instances).shuffle().value()[0]
+    })
 }
 
 // Gets all of the instances of a service
 module.exports.getAll = function (name) {
   // Note that this uses the KEYS command, which is inneficient. We should
   // find a more efficient way to do grouping in the future
+  console.log(`service:${name}:*`)
   return client.keysAsync(`service:${name}:*`)
-    .then(members => {
+    .then(keys => {
+      if (keys.length === 0) {
+        throw new Error(`Service ${name} not registered`)
+      }
+      // Parellize promises  Note: may be better to alter API so that multiple
+      // promises aren't needed, especially for getByID
+      return Promise.all(_.map(keys, key => {
+        return client.getAsync(key)
+      }))
+    }).then(members => {
       // Reserialize
       return _.map(members, JSON.parse)
     })
