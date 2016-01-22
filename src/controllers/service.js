@@ -18,8 +18,6 @@ module.exports.registryHandler = function (msg, rinfo) {
 module.exports.Router = () => {
   const router = express.Router()
 
-  // Get information about a specific microservice instance
-  router.get('/registry/:name/:id')
   // Get list of microservice instances with registered name
   router.get('/registry/:name', (req, res) => {
     serviceRegistry.getAll(req.params.name)

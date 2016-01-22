@@ -18,8 +18,8 @@ module.exports.setClient = function (redisClient) {
 
 // Adds a new service instance
 module.exports.add = function (serviceInstance) {
-  const {ipAddr, id, name} = serviceInstance
-  if (!id || !ipAddr || !name) throw new Error('Required parameters missing: Need ipAddr name and id')
+  const {ipAddr, id, name, version} = serviceInstance
+  if (!id || !ipAddr || !name || !version) throw new Error('Required parameters missing: Need ipAddr, version, name and id')
 
   const serialized = JSON.stringify(serviceInstance)
   const key = `service:${name}:${id}`
@@ -56,12 +56,13 @@ module.exports.getAll = function (name, versionQ) {
       return client.mgetAsync(keys)
     }).then(members => {
       // Reserialize
-      return _(members)
-        .map(JSON.parse)
-        .filter(({version}) => {
+      const instances = _.map(members, JSON.parse)
+      if (versionQ) {
+        return _.filter(instances, ({version}) => {
           return semver.satisfies(version, `^${versionQ}`)
         })
-        .value()
+      }
+      return instances
     })
 }
 
