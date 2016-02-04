@@ -4,10 +4,10 @@
 const crypto = require('crypto')
 const express = require('express')
 const morgan = require('morgan')
-const bodyParser = require('body-parser')
 const session = require('express-session')
 const RedisStore = require('connect-redis')(session)
 const passport = require('passport')
+const dgram = require('dgram')
 
 // Local modules
 const auth = require('./controllers/authentication')
@@ -18,6 +18,7 @@ const registryController = require('./controllers/service')
 
 const PORT = process.env.PORT || 3000
 const API_ROOT = '/api/v1'
+const REGISTRY_PORT = process.env.REGISTRY_PORT || 8888
 
 // Immediately begin connecting to redis
 const rc = users.initializeRedis({
@@ -36,8 +37,8 @@ var app = express()
 // request logging
 app.use(morgan(process.env.LOG_FORMAT || 'dev'))
 // parse both json and url-encoded body content
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({extended: false}))
+// app.use(bodyParser.json())
+// app.use(bodyParser.urlencoded({extended: false}))
 // support user sessions
 app.use(session({
   secret: crypto.randomBytes(64).toString('hex'),
@@ -68,3 +69,20 @@ const server = app.listen(PORT, () => {
   }
   console.log(`server listening at http://${addr.address}:${addr.port}`)
 })
+
+// Startup UDP Registration server
+const registry = dgram.createSocket('udp4')
+
+registry.on('error', (err) => {
+  console.log(`Registry error:\n${err.stack}`)
+  registry.close()
+})
+
+registry.on('message', registryController.registryHandler)
+
+registry.on('listening', () => {
+  var address = registry.address()
+  console.log(`Registry listening ${address.address}:${address.port}`)
+})
+
+registry.bind(REGISTRY_PORT)
