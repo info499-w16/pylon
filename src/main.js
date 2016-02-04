@@ -8,7 +8,6 @@ const session = require('express-session')
 const RedisStore = require('connect-redis')(session)
 const redis = require('redis')
 const passport = require('passport')
-const dgram = require('dgram')
 
 // Local modules
 const auth = require('./controllers/authentication')
@@ -17,10 +16,10 @@ const localAuth = require('./controllers/local-auth')
 const registryModel = require('./models/service-registry')
 const registryController = require('./controllers/service')
 import {router as UserRouter} from './controllers/users'
+import {default as initRegistry} from './heartbeat/receiver'
 
 const PORT = process.env.PORT || 3000
 const API_ROOT = '/api/v1'
-const REGISTRY_PORT = process.env.REGISTRY_PORT || 8888
 
 // Immediately begin connecting to redis
 const rc = redis.createClient({
@@ -78,20 +77,5 @@ users.init().then(() => {
     console.log(`server listening at http://${addr.address}:${addr.port}`)
   })
 
-  // Startup UDP Registration server
-  const registry = dgram.createSocket('udp4')
-
-  registry.on('error', (err) => {
-    console.log(`Registry error:\n${err.stack}`)
-    registry.close()
-  })
-
-  registry.on('message', registryController.registryHandler)
-
-  registry.on('listening', () => {
-    var address = registry.address()
-    console.log(`Registry listening ${address.address}:${address.port}`)
-  })
-
-  registry.bind(REGISTRY_PORT)
+  initRegistry()
 })
