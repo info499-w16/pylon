@@ -24,11 +24,12 @@ const REGISTRY_PORT = process.env.REGISTRY_PORT || 8888
 const rc = users.initializeRedis({
   // REDIS_NAME is automatically set by docker
   // If not found, assume it's running on the localhost
-  host: process.env.REDIS_NAME ? 'redis' : 'localhost'
+  host: process.env.REDIS_HOST || '127.0.0.1',
+  port: process.env.REDIS_PORT || 6379
 })
 
-// Allows the registry to store information
-registryModel.setClient(rc)
+// Set registry to use our default redis store
+registryModel.setStore(rc)
 
 // create the express application
 var app = express()

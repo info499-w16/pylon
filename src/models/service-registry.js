@@ -1,7 +1,13 @@
-const redis = require('redis')
-const bluebird = require('bluebird')
-const _ = require('lodash')
-const semver = require('semver')
+import * as redis from 'redis'
+import * as bluebird from 'bluebird'
+import * as _ from 'lodash'
+import * as semver from 'semver'
+
+// Just export all of our functions
+export {
+  setStore, add, get, getAll, getById, remove, authorize,
+  isAuthorized, ban
+}
 
 // Sets how often a service needs to update itself
 const TTL = process.env.TTL || 40
@@ -10,14 +16,16 @@ const TTL = process.env.TTL || 40
 bluebird.promisifyAll(redis.RedisClient.prototype)
 bluebird.promisifyAll(redis.Multi.prototype)
 
-var client
+// Used to store the client when accessing other methods
+let client
 
-module.exports.setClient = function (redisClient) {
-  client = redisClient
-}
+// Sets the connection to redis. We don't initialize a new store because
+// we want to just keep everything in a single store, since there's so little
+// information that we need to keep around.
+function setStore (redisClient) { client = redisClient }
 
 // Adds a new service instance
-module.exports.add = function (serviceInstance) {
+function add (serviceInstance) {
   const {ipAddr, id, name, version} = serviceInstance
   if (!id || !ipAddr || !name || !version) throw new Error('Required parameters missing: Need ipAddr, version, name and id')
 
@@ -31,11 +39,11 @@ module.exports.add = function (serviceInstance) {
 }
 
 // Gets an instance of a service that satisfies provided version constraint
-module.exports.get = function (name, version) {
+function get (name, version) {
   // Note that if we have multiple versions of a service, this will just give
   // back random ones, with no real preference. Should find a way to do real load
   // balancing
-  return module.exports.getAll(name, version)
+  return getAll(name, version)
     .then(instances => {
       return _(instances).shuffle().value()[0]
     })
@@ -43,7 +51,7 @@ module.exports.get = function (name, version) {
 
 // Gets all of the instances of a service, optionally filtering by the
 // supplied version using the same technique NPM uses for handling packges
-module.exports.getAll = function (name, versionQ) {
+function getAll (name, versionQ) {
   // Note that this uses the KEYS command, which is inneficient. We should
   // find a more efficient way to do grouping in the future
   console.log(`service:${name}:*`)
@@ -67,30 +75,30 @@ module.exports.getAll = function (name, versionQ) {
 }
 
 // Gets a specific instance of a service
-module.exports.getById = function (name, id) {
-  return module.exports.getAll(name)
+function getById (name, id) {
+  return getAll(name)
     .then(members => {
       return _.filter(members, {'id': id})[0]
     })
 }
 
 // Removes an instance of a service
-module.exports.remove = function (name, id) {
+function remove (name, id) {
   return client.delAsync(`service:${name}:${id}`)
 }
 
 // Authorizes a user to use a given service
-module.exports.authorize = function (name, userId) {
+function authorize (name, userId) {
   // Eventually use a more expressive model, like groups
   return client.saddAsync(`service:${name}:authorized`, userId)
 }
 
 // Does the user have the authority to use said service?
-module.exports.isAuthorized = function (name, userId) {
+function isAuthorized (name, userId) {
   return client.sismemberAsync(`service:${name}:authorized`, userId)
 }
 
 // Deauthorizes a user to use a given service
-module.exports.ban = function (name, userId) {
+function ban (name, userId) {
   return client.spopAsync(`service:${name}:authorized`, userId)
 }
