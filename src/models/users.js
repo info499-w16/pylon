@@ -1,4 +1,5 @@
 import {default as Knex} from 'knex'
+import {default as _} from 'lodash'
 
 export {
   init, getById, getByAuthId, insert, update, doesUserExist, getAll,
@@ -21,6 +22,14 @@ const knex = Knex({
     database: 'users'
   }
 })
+
+// Used for better aliases when doing level filtering
+export const authLevels = {
+  'student': 0,
+  'ta': 1,
+  'teacher': 2,
+  'admin': 3
+}
 
 const USERS_TABLE = 'users'
 
@@ -69,7 +78,7 @@ function getById (id) {
   return knex(USERS_TABLE)
     .where('id', id)
     .then(users => {
-      if (users === []) return null
+      if (users.length === 0) return null
       else return deserialize(users[0])
     })
 }
@@ -79,7 +88,7 @@ function getByAuthId (id) {
   return knex(USERS_TABLE)
     .where('authId', id)
     .then(users => {
-      if (users === []) return null
+      if (users.length === 0) return null
       else return deserialize(users[0])
     })
 }
@@ -117,21 +126,31 @@ function doesUserExist (id) {
 }
 
 // Gets every single user that is registered
-function getAll () {
-  return knex(USERS_TABLE)
+// Optionally filters by authorization level
+function getAll (level) {
+  let users = knex(USERS_TABLE)
     .select(['id', 'authId', 'name', 'email'])
+
+  try {
+    if (level) {
+      level = _.isString(level) ? lookUpLevel(level) : level
+      users.where('authLevel', level)
+    }
+    return users
+  } catch (err) { return Promise.reject(err) }
+}
+
+function lookUpLevel (level) {
+  let result = authLevels[level]
+  if (result === undefined) throw new Error(`Authority level undefined: ${level}`)
+
+  return result
 }
 
 // Sets the authority level of a user
 // where authority = {'student', 'teacher', 'ta', 'admin'}
 function setAuthority (id, level) {
-  const levels = {
-    'student': 0,
-    'ta': 1,
-    'teacher': 2,
-    'admin': 3
-  }
-  const rawLevel = levels[level]
+  const rawLevel = authLevels[level]
   if (!rawLevel) throw new Error(`Cannot set unknown authority level: ${level}`)
 
   return knex(USERS_TABLE)

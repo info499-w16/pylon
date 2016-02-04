@@ -16,6 +16,7 @@ const users = require('./models/users')
 const localAuth = require('./controllers/local-auth')
 const registryModel = require('./models/service-registry')
 const registryController = require('./controllers/service')
+import {router as UserRouter} from './controllers/users'
 
 const PORT = process.env.PORT || 3000
 const API_ROOT = '/api/v1'
@@ -66,12 +67,8 @@ users.init().then(() => {
   app.use(API_ROOT, auth.ensureAuth('/signin/google'))
   app.use(API_ROOT, registryController.Router())
 
-  // Show all users
-  app.use('/users', (req, res) => {
-    users.getAll().then(users => {
-      res.json(users)
-    })
-  })
+  // Attach users router
+  app.use('/users', UserRouter)
 
   const server = app.listen(PORT, () => {
     const addr = server.address()
