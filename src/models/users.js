@@ -129,7 +129,7 @@ function doesUserExist (id) {
 // Optionally filters by authorization level
 function getAll (level) {
   let users = knex(USERS_TABLE)
-    .select(['id', 'authId', 'name', 'email'])
+    .select(['id', 'authId', 'name', 'email', 'authLevel'])
 
   try {
     if (level) {
@@ -150,10 +150,13 @@ function lookUpLevel (level) {
 // Sets the authority level of a user
 // where authority = {'student', 'teacher', 'ta', 'admin'}
 function setAuthority (id, level) {
-  const rawLevel = authLevels[level]
-  if (!rawLevel) throw new Error(`Cannot set unknown authority level: ${level}`)
+  try {
+    level = _.isString(level) ? lookUpLevel(level) : level
 
-  return knex(USERS_TABLE)
-    .where('id', id)
-    .update('authLevel', rawLevel)
+    return knex(USERS_TABLE)
+      .where('id', id)
+      .update('authLevel', level)
+  } catch (err) {
+    return Promise.reject(err)
+  }
 }

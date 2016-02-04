@@ -5,31 +5,43 @@ import * as users from '../models/users'
 // Should be mounted under /users, all requests will assume this as a prefix
 export const router = express.Router()
 
+// Catches an error from a promise, sending a 400 status and printing the string
+function handleBadReq (promise, res) {
+  promise.catch(err => {
+    res.status(400).send(err.toString())
+  })
+}
+
 // Show all users
 router.get('/all', (req, res) => {
-  users.getAll().then(users => {
+  const main = users.getAll().then(users => {
     res.json(users)
-  }).catch(err => {
-    res.status(400).send(err.toString())
   })
+  handleBadReq(main, res)
 })
 router.get('/all/:authLevel', (req, res) => {
-  users.getAll(req.params.authLevel).then(users => {
+  const main = users.getAll(req.params.authLevel).then(users => {
     res.json(users)
-  }).catch(err => {
-    res.status(400).send(err.toString())
   })
+  handleBadReq(main, res)
 })
 
 // Get a sepecific user
 router.get('/:id', (req, res) => {
-  users.getById(req.params.id).then(user => {
+  const main = users.getById(req.params.id).then(user => {
     if (user) {
       res.json(user)
     } else {
       res.sendStatus(404)
     }
-  }).catch(err => {
-    res.status(400).json(err)
   })
+  handleBadReq(main, res)
+})
+
+// Set the authority level of a user
+router.post('/:id/authorize/:authLevel', (req, res) => {
+  const main = users.setAuthority(req.params.id, req.params.authLevel).then(() => {
+    res.sendStatus(200)
+  })
+  handleBadReq(main, res)
 })
