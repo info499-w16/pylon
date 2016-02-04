@@ -17,6 +17,7 @@ const registryModel = require('./models/service-registry')
 const registryController = require('./controllers/service')
 import {router as UserRouter} from './controllers/users'
 import {default as initRegistry} from './heartbeat/receiver'
+import {default as broadcast} from './heartbeat/broadcaster'
 
 const PORT = process.env.PORT || 3000
 const API_ROOT = '/api/v1'
@@ -77,5 +78,10 @@ users.init().then(() => {
     console.log(`server listening at http://${addr.address}:${addr.port}`)
   })
 
+  // Sets up server to continuously listen for microservice broadcasts and add them
+  // to the redis store
   initRegistry()
+
+  // Sets up server to continously broadcast the IP address of pylon
+  broadcast()
 })
