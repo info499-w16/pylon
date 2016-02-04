@@ -66,6 +66,13 @@ users.init().then(() => {
   app.use(API_ROOT, auth.ensureAuth('/signin/google'))
   app.use(API_ROOT, registryController.Router())
 
+  // Show all users
+  app.use('/users', (req, res) => {
+    users.getAll().then(users => {
+      res.json(users)
+    })
+  })
+
   const server = app.listen(PORT, () => {
     const addr = server.address()
     if (addr.address === '::') {

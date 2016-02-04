@@ -57,13 +57,20 @@ function init () {
     })
 }
 
+// Helper function for getting JSON of users back
+function deserialize (user) {
+  const parsed = JSON.parse(user.profile)
+  user.profile = parsed
+  return user
+}
+
 // Get's a user by looking up thier database ID (maybe faster)
 function getById (id) {
   return knex(USERS_TABLE)
     .where('id', id)
     .then(users => {
       if (users === []) return null
-      else return users[0]
+      else return deserialize(users[0])
     })
 }
 
@@ -73,7 +80,7 @@ function getByAuthId (id) {
     .where('authId', id)
     .then(users => {
       if (users === []) return null
-      else return users[0]
+      else return deserialize(users[0])
     })
 }
 
@@ -112,7 +119,7 @@ function doesUserExist (id) {
 // Gets every single user that is registered
 function getAll () {
   return knex(USERS_TABLE)
-    .select('*')
+    .select(['id', 'authId', 'name', 'email'])
 }
 
 // Sets the authority level of a user
