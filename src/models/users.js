@@ -1,7 +1,7 @@
 import {default as Knex} from 'knex'
 
 export {
-  init, getById, getByGoogleId, insert, update, doesUserExist, getAll,
+  init, getById, getByAuthId, insert, update, doesUserExist, getAll,
   setAuthority
 }
 
@@ -26,19 +26,24 @@ const USERS_TABLE = 'users'
 
 // Create table (if it doesn't exist)
 function buildUsers () {
-  return knex.schema.createTableIfNotExists(USERS_TABLE, function (table) {
-    table.increments('id') // Creates auto-incrementing ID
-    table.string('name').notNullable()
-    table.string('authId').unique().notNullable()
-    table.string('email').notNullable()
-    table.text('profile') // This is just the serialized text that we get back from google
-    // This represents how much authority the user has
-    // 0 -> Student
-    // 1 -> TA
-    // 2 -> Teacher
-    // 3 -> Administrator
-    table.int('authLevel').notNullable()
-    table.timestamps()
+  return knex.schema.hasTable('users').then(exists => {
+    if (!exists) {
+      return knex.schema.createTable(USERS_TABLE, function (table) {
+        console.log('Users table does not exist, building...')
+        table.increments('id') // Creates auto-incrementing ID
+        table.string('name').notNullable()
+        table.string('authId').unique().notNullable()
+        table.string('email').notNullable()
+        table.text('profile') // This is just the serialized text that we get back from google
+        // This represents how much authority the user has
+        // 0 -> Student
+        // 1 -> TA
+        // 2 -> Teacher
+        // 3 -> Administrator
+        table.integer('authLevel').notNullable()
+        table.timestamps()
+      })
+    }
   })
 }
 
@@ -52,14 +57,24 @@ function init () {
     })
 }
 
-// Get's a user by looking up thier database ID (much faster)
+// Get's a user by looking up thier database ID (maybe faster)
 function getById (id) {
-  return knex(USERS_TABLE).where('id', id)
+  return knex(USERS_TABLE)
+    .where('id', id)
+    .then(users => {
+      if (users === []) return null
+      else return users[0]
+    })
 }
 
 // Get's a user by looking up their GOOGLE id
-function getByGoogleId (id) {
-  return knex(USERS_TABLE).where('authId', id)
+function getByAuthId (id) {
+  return knex(USERS_TABLE)
+    .where('authId', id)
+    .then(users => {
+      if (users === []) return null
+      else return users[0]
+    })
 }
 
 // Adds a user with the specified GOOGLE id
@@ -71,8 +86,9 @@ function insert (id, user, level = 0) {
       profile: user.oauthProfile, // deserialize the json
       name: user.displayName,
       email: user.email,
-      authLevel: level
-    })
+      authLevel: level,
+      created_at: new Date()
+    }, 'id').then(([id]) => getById(id))
 }
 
 // Updates a user's profile information with new information
@@ -82,8 +98,9 @@ function update (user) {
     .update({
       profile: user.oauthProfile,
       name: user.displayName,
-      email: user.email
-    })
+      email: user.email,
+      updated_at: new Date()
+    }, 'id').then(([id]) => getById(id))
 }
 
 // Returns whether a user exists

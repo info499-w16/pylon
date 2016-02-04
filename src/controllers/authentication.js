@@ -5,7 +5,7 @@ module.exports.serializeUser = function (user, done) {
 }
 
 module.exports.deserializeUser = function (id, done) {
-  users.getById(id)
+  users.getByAuthId(id)
     .then(done.bind(null, null))
     .catch(done)
 }

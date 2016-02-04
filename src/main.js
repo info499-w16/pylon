@@ -32,6 +32,8 @@ registryModel.setStore(rc)
 
 // Attempt to connect to the users database
 users.init().then(() => {
+  console.log('Successfully connected to database')
+
   // create the express application
   var app = express()
 

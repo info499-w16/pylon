@@ -36,7 +36,7 @@ function applyToUser (profile, user) {
     user.email = profile.emails[0].value
   }
 
-  user.oathProfile = profile
+  user.oauthProfile = profile
   return user
 }
 
@@ -47,9 +47,8 @@ module.exports.Strategy = () => {
     callbackURL: `http://localhost:${process.env.PORT || 3000}/auth/google/callback`
   }, (accessToken, refreshToken, profile, done) => {
     // see if user already exists
-    users.getById(profile.id)
+    users.getByAuthId(profile.id)
       .then(user => {
-        console.log('got a user by ID')
         if (!user) {
           return users.insert(profile.id, convertToUser(profile))
         } else {
@@ -57,8 +56,6 @@ module.exports.Strategy = () => {
         }
       })
       .then(user => {
-        console.log('got a user, calling done function')
-        console.log(user)
         done(null, user)
       })
       .catch(done)
