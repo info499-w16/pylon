@@ -1,9 +1,18 @@
 import * as express from 'express'
+import {default as bodyParser} from 'body-parser'
 
 import * as users from '../models/users'
 
 // Should be mounted under /users, all requests will assume this as a prefix
 export const router = express.Router()
+
+// Use body parsing on this route ONLY
+// This is important, because when this is enabled globally it PREVENTS
+// forwarding from working properly, and leads to mysterious socket hang up
+// errors. Be wary of global middleware usage because it may impact how
+// requests are forwarded.
+router.use(bodyParser.json())
+router.use(bodyParser.urlencoded({extended: false}))
 
 // Catches an error from a promise, sending a 400 status and printing the string
 function handleBadReq (promise, res) {
