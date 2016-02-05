@@ -24,4 +24,4 @@ Currently echo doesn't do what the name implies, but writes out the body as the 
 {"hello":"world"}
 ```
 
-Accessing `http://domain.com/api/v1/forward/echo/v0.0.1/hello` is equivilant to calling `http://echos-domain.com/hello`. The version is not optional, and if no service meets the semantic requiremento of `^version`, then you will get a 404.
+Accessing `http://domain.com/registry/forward/echo/v0.0.1/hello` is equivilant to calling `http://echos-domain.com/hello`. The version is not optional, and if no service meets the semantic requiremento of `^version`, then you will get a 404.
