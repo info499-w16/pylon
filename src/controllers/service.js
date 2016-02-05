@@ -19,7 +19,7 @@ module.exports.Router = () => {
   const router = express.Router()
 
   // Get list of microservice instances with registered name
-  router.get('/registry/:name', (req, res) => {
+  router.get('/:name', (req, res) => {
     serviceRegistry.getAll(req.params.name)
       .then(services => {
         res.json(services)
@@ -31,11 +31,11 @@ module.exports.Router = () => {
 
   // Make is so that only 'admins' can do this in the future
   // See who's authorized to use a given service
-  router.get('/registry/:name/:id/authentication')
+  router.get('/:name/:id/authentication')
   // Authorize a user
-  router.post('/registry/:name/:id/authentication/:userId')
+  router.post('/:name/:id/authentication/:userId')
   // Deauthorize a user
-  router.delete('/registry/:name/:id/authentication/:userId')
+  router.delete('/:name/:id/authentication/:userId')
 
   // This is where we will perform forwarding and do service lookups
   router.all('/forward/:name/:version/*', (req, res) => {
@@ -52,8 +52,8 @@ module.exports.Router = () => {
         const uri = `http://${ipAddr}:${port}${forwardedPath}`
         // Proxy the reqest
         req.pipe(request(uri)).pipe(res)
-      }).catch(() => {
-        res.status(404).send(`Service '${req.params.name}' not found :(`)
+      }).catch(err => {
+        res.status(404).send(`Service '${req.params.name}' not found :(.\nError details: ${err.toString()}`)
       })
   })
 

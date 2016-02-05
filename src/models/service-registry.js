@@ -1,6 +1,6 @@
 import * as redis from 'redis'
 import * as bluebird from 'bluebird'
-import * as _ from 'lodash'
+import {default as _} from 'lodash'
 import * as semver from 'semver'
 
 // Just export all of our functions

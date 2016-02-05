@@ -21,7 +21,7 @@ import {default as initRegistry} from './heartbeat/receiver'
 import {default as broadcast} from './heartbeat/broadcaster'
 
 const PORT = process.env.PORT || 3000
-const API_ROOT = '/api/v1'
+const API_ROOT = '/registry'
 
 // Immediately begin connecting to redis
 const rc = redis.createClient({
@@ -65,7 +65,7 @@ users.init().then(() => {
   app.use(localAuth.GoogleRouter())
 
   // In order to use the main API they must be authenticated
-  app.use(API_ROOT, auth.ensureAuth('/signin/google'))
+  //app.use(API_ROOT, auth.ensureAuth('/signin/google'))
   app.use(API_ROOT, registryController.Router())
 
   // Attach users router
