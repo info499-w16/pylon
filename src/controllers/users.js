@@ -38,11 +38,7 @@ router.get('/all/:authLevel', (req, res) => {
 // Get a sepecific user
 router.get('/:id', (req, res) => {
   const main = users.getById(req.params.id).then(user => {
-    if (user) {
-      res.json(user)
-    } else {
-      res.sendStatus(404)
-    }
+    res.json(user)
   })
   handleBadReq(main, res)
 })

@@ -79,6 +79,9 @@ function getById (id) {
     .where('id', id)
     .first('*')
     .then(user => {
+      if (!user) {
+        return Promise.reject(new Error('User Not Found'))
+      }
       return deserialize(user)
     })
 }
