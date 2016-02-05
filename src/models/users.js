@@ -3,7 +3,7 @@ import {default as _} from 'lodash'
 
 export {
   init, getById, getByAuthId, insert, update, doesUserExist, getAll,
-  setAuthority
+  setAuthority, getMany
 }
 
 const DB_PASSWORD = process.env.DB_PASSWORD
@@ -77,9 +77,18 @@ function deserialize (user) {
 function getById (id) {
   return knex(USERS_TABLE)
     .where('id', id)
+    .first('*')
+    .then(user => {
+      return deserialize(user)
+    })
+}
+
+// Given an an array of user ids, get's back an array of users
+function getMany (ids) {
+  return knex(USERS_TABLE)
+    .whereIn('id', ids)
     .then(users => {
-      if (users.length === 0) return null
-      else return deserialize(users[0])
+      return users.map(deserialize)
     })
 }
 
@@ -87,9 +96,9 @@ function getById (id) {
 function getByAuthId (id) {
   return knex(USERS_TABLE)
     .where('authId', id)
-    .then(users => {
-      if (users.length === 0) return null
-      else return deserialize(users[0])
+    .first('*')
+    .then(user => {
+      return deserialize(user)
     })
 }
 

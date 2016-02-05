@@ -38,6 +38,15 @@ router.get('/:id', (req, res) => {
   handleBadReq(main, res)
 })
 
+// Gets a selection of users
+router.post('/get-selected', (req, res) => {
+  const ids = req.body.ids
+  const main = users.getMany(ids).then(users => {
+    res.json({users})
+  })
+  handleBadReq(main, res)
+})
+
 // Set the authority level of a user
 router.post('/:id/authorize/:authLevel', (req, res) => {
   const main = users.setAuthority(req.params.id, req.params.authLevel).then(() => {

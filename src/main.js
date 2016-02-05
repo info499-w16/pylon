@@ -8,6 +8,7 @@ const session = require('express-session')
 const RedisStore = require('connect-redis')(session)
 const redis = require('redis')
 const passport = require('passport')
+import {default as bodyParser} from 'body-parser'
 
 // Local modules
 const auth = require('./controllers/authentication')
@@ -42,8 +43,8 @@ users.init().then(() => {
   // request logging
   app.use(morgan(process.env.LOG_FORMAT || 'dev'))
   // parse both json and url-encoded body content
-  // app.use(bodyParser.json())
-  // app.use(bodyParser.urlencoded({extended: false}))
+  app.use(bodyParser.json())
+  app.use(bodyParser.urlencoded({extended: false}))
   // support user sessions
   app.use(session({
     secret: crypto.randomBytes(64).toString('hex'),
