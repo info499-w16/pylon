@@ -50,8 +50,14 @@ module.exports.Router = () => {
         const idx = `/forward/${req.params.name}/${req.params.version}`.length
         const forwardedPath = req.url.substring(idx)
         const uri = `http://${ipAddr}:${port}${forwardedPath}`
+        const options = {
+          url: uri,
+          headers: {
+            'X-User': '1234'
+          }
+        }
         // Proxy the reqest
-        req.pipe(request(uri)).pipe(res)
+        req.pipe(request(options)).pipe(res)
       }).catch(err => {
         res.status(404).send(`Service '${req.params.name}' not found :(.\nError details: ${err.toString()}`)
       })
