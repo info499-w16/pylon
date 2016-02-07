@@ -19,8 +19,8 @@ The postgres containers contains records for all users, and is need for doing an
 ```bash
 docker run --name users-db \
     -e "POSTGRES_PASSWORD=supersecretpass" \
-    -e "POSTGRES_DB=users"
-    -p $HOST_PORT:$PYLON_PORT
+    -e "POSTGRES_DB=users" \
+    -p $HOST_PORT:$PYLON_PORT \
     -d postgres
 ```
 
