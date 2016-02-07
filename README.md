@@ -2,13 +2,51 @@
 A microservice gateway
 
 ## Building
-Dockerfile should be coming soon, but a 
+
+A dockerfile is included to make building the container extremely simple.
+
+Just execute `docker build -t $REPOSTORY .` from the root of the project and new image will be built.
+
 ## Running
 
-Recommended to run as a docker container. Requires that redis be running on the localhost at the default port. Once all of these conditions are met, do an `npm start`, and the application should be running on port 3000 (unless overridden with the environment variable `PORT`).
+Before running pylon, you must first create a container for __redis__ and
+__postgres__. For simplicity all of these containers should share the same
+_host_, that way pylon can access them via localhost.
 
-Also requires two environment variables to be set
-`CLIENT` and `SECRET`, which correspond the values used by your registered google application. Without these the application will not start
+### Postgres
+The postgres containers contains records for all users, and is need for doing any sort of authorization or lookup. Users are so common across services, that they have a dedicated endpoint and are built into pylon instead of being a separate service.
+
+```bash
+docker run --name users-db \
+    -e "POSTGRES_PASSWORD=supersecretpass" \
+    -e "POSTGRES_DB=users"
+    -p $HOST_PORT:$PYLON_PORT
+    -d postgres
+```
+
+### Redis
+Redis is used both for session management, and for microservice discovery and registration. If redis isn't running, users won't be able to authenticate or login, and requests won't be forwarded to any services.
+
+```bash
+docker run --name session-store \
+    --net=container:users-db \
+    -d redis
+```
+
+### Pylon
+And now that we have those two containers running (check with `docker ps` that they are actually running and didn't crash for some reason), we can at last get pylon up and running.
+
+```bash
+docker run --name pylon \
+    --net=container:users-db \
+    -e "CLIENT=googleClientAppId" \
+    -e "SECRET=googleAppSecret" \
+    -e "PORT=3000"
+    -e "DB_PASSWORD=superscretpass" \
+    -d calebt5/info499.pylon
+```
+Also requires 3 environment variables to be set
+`CLIENT`, `DB_PASSWORD` and `SECRET`, which correspond the values used by your registered google application, and the password for the users database that you setup earlier. Without these the application will not start
 
 Currently this doesn't do anything without also running another service that identifies itself via UDP broadcast. [__Echo__](https://github.com/info499-w16/echo) is an example of a service which provides self identifying information and registers itself with Pylon.
 
