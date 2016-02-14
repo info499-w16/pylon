@@ -49,16 +49,16 @@ module.exports.Strategy = () => {
     // see if user already exists
     users.getByAuthId(profile.id)
       .then(user => {
-        if (!user) {
-          return users.insert(profile.id, convertToUser(profile))
-        } else {
-          return users.update(applyToUser(profile, user))
-        }
+        return users.update(applyToUser(profile, user))
+      })
+      // User wasn't found
+      .catch(e => {
+        console.log('User not found, creating new one in database')
+        return users.insert(profile.id, convertToUser(profile))
       })
       .then(user => {
         done(null, user)
       })
-      .catch(done)
   })
 }
 

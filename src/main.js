@@ -24,7 +24,7 @@ const API_ROOT = '/registry'
 
 // Immediately begin connecting to redis
 const rc = redis.createClient({
-  host: process.env.REDIS_HOST || '127.0.0.1',
+  host: 'session-store',
   port: process.env.REDIS_PORT || 6379
 })
 

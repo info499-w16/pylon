@@ -16,7 +16,7 @@ if (!DB_PASSWORD) {
 const knex = Knex({
   client: 'pg',
   connection: {
-    host: '127.0.0.1',
+    host: 'users-db',
     user: 'postgres',
     password: DB_PASSWORD,
     database: 'users'
@@ -101,6 +101,9 @@ function getByAuthId (id) {
     .where('authId', id)
     .first('*')
     .then(user => {
+      if (!user) {
+        return Promise.reject(new Error('User not found'))
+      }
       return deserialize(user)
     })
 }
