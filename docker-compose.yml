@@ -1,0 +1,20 @@
+version: '2'
+services:
+  pylon:
+    image: calebt5/info499.pylon
+    links:
+      - session-store
+      - users-db
+    environment:
+      - DB_PASSWORD
+      - CLIENT
+      - SECRET
+    ports:
+      - 3000:3000
+  session-store:
+    image: redis
+  users-db:
+    image: postgres
+    environment:
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB=users
