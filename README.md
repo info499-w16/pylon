@@ -7,7 +7,23 @@ A dockerfile is included to make building the container extremely simple.
 
 Just execute `docker build -t $REPOSTORY .` from the root of the project and new image will be built.
 
-## Running
+## Running (The easy way)
+Set the following environment variables:
+- `POSTGRES_PASSWORD`
+- `POSGRES_DB=users`
+- `CLIENT=google api client id`
+- `SECRET=google api secret key`
+
+Run `docker-compose up`. You're done, and the application is running! Docker compose is a wonderful
+tool that makes dealing with multi-container applications easy. The specification can be found in the
+`docker-compose.yml` file if you want the details or want to modify it.
+
+The hard way outlined below has the exact same effect, it's just more of a pain in the ass.
+
+If you make an update to a file and want to run the updated appplication, just do `docker-compose build`, and then
+run it again with `docker-compose up`.
+
+## Running (The hard way)
 
 Before running pylon, you must first create a container for __redis__ and
 __postgres__. For simplicity all of these containers should share the same
