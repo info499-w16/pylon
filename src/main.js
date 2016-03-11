@@ -22,6 +22,13 @@ import {default as broadcast} from './heartbeat/broadcaster'
 const PORT = process.env.PORT || 3000
 const API_ROOT = '/registry'
 
+const MAIN_SITE_PATH = process.env.MAIN_SITE_PATH
+if (!MAIN_SITE_PATH) {
+  console.log(process.env.MAIN_SITE_PATH)
+  throw new Error('MAIN_SITE_PATH env variable not set!')
+}
+
+
 // Immediately begin connecting to redis
 const rc = redis.createClient({
   host: 'session-store',
@@ -68,6 +75,15 @@ users.init().then(() => {
 
   // Attach users router
   app.use('/users', UserRouter)
+
+  // Heres the static resources for those not yet signed in
+  // A simple webpage can be located here
+  app.use('/static/public', express.static('public'))
+
+  // Add serving of static content
+  // Heres the static resources for people signed in
+  // The main website should be located here
+  app.use('/static/authenticated', express.static(MAIN_SITE_PATH))
 
   const server = app.listen(PORT, () => {
     const addr = server.address()
