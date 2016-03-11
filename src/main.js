@@ -68,6 +68,7 @@ users.init().then(() => {
   app.use(passport.session())
   app.use(localAuth.GoogleRouter())
 
+
   // In order to use the main API they must be authenticated
   // app.use(API_ROOT, auth.ensureAuth('/signin/google'))
   // ^^^^ temporarily disabled to make debugging easier
@@ -82,6 +83,8 @@ users.init().then(() => {
 
   // Add serving of static content
   // Heres the static resources for people signed in
+  // You can only access this if logged in of course
+  app.use('/static/authenticated', auth.ensureAuth('/signin/google'))
   // The main website should be located here
   app.use('/static/authenticated', express.static(MAIN_SITE_PATH))
 
@@ -91,6 +94,11 @@ users.init().then(() => {
       addr.address = 'localhost'
     }
     console.log(`server listening at http://${addr.address}:${addr.port}`)
+  })
+
+  // If the root is accessed, redirect by default to the main site
+  app.use('/', (req, res) => {
+    res.redirect('/static/authenticated')
   })
 
   // Sets up server to continuously listen for microservice broadcasts and add them

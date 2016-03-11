@@ -21,6 +21,12 @@ function handleBadReq (promise, res) {
   })
 }
 
+// Shows information about the user as identified by the given session
+router.get('/me', (req, res) => {
+  // Send the user associated with the session
+  res.send(req.user)
+})
+
 // Show all users
 router.get('/all', (req, res) => {
   const main = users.getAll().then(users => {
