@@ -24,7 +24,7 @@ function handleBadReq (promise, res) {
 // Shows information about the user as identified by the given session
 router.get('/me', (req, res) => {
   // Send the user associated with the session
-  res.send(req.user)
+  res.json(req.user)
 })
 
 // Show all users

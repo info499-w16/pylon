@@ -27,7 +27,7 @@ module.exports.backToRequestedUrl = function (req, res, next) {
     delete req.session.afterAuthRedirectTo
   } else {
     // Go to the main site
-    url = '/static/authenticated'
+    url = '/static/authenticated#' + req.cookies['connect.sid']
   }
   res.redirect(url)
 }

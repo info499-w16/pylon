@@ -54,6 +54,7 @@ users.init().then(() => {
     secret: crypto.randomBytes(64).toString('hex'),
     resave: false,
     saveUninitialized: false,
+    cookie: { httpOnly: false }, // Need this so we can access our cookie in the client via JS
     store: new RedisStore({client: rc})
   }))
 
